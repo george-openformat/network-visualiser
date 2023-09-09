@@ -14,7 +14,7 @@ function sketch(p) {
   const gridSize = 15
   const amount = (innerWidth / gridSize) * (innerHeight / gridSize)
   console.log(amount)
-  const nodes = addNodes(p, parseInt(amount * 0.1), gridSize)
+  const nodes = addNodes(p, parseInt(amount * 0.11), gridSize)
 
   const green = p.color(255)
   const star = p.color('#39c463')
@@ -34,27 +34,34 @@ function sketch(p) {
     p.stroke(white)
     for (let node of nodes) {
       const { x, y } = node.state.position
-      p.strokeWeight(p.map(mouse.dist(node.state.position), 0, 250, 3, 2, true))
-      const e = p.map(node.state.energy, 0, node.state.size, 0, 1)
+      const s = p.map(node.state.energy, 0, node.state.size, 1, 2)
+      p.strokeWeight(p.map(mouse.dist(node.state.position), 0, 250, s * 2, s, true))
+      const e = p.map(node.state.energy, 5, node.state.size, 0, 1, true)
       for (let { state: { position: c } } of node.getConnections()) {
         p.stroke(white)
         if (node.state.recentlyFired) {
           (node.getConnections()).length <= 5 ? p.stroke(star) : p.stroke(green)
         }
+
         p.line(x, y, c.x, c.y)
+
+        // animate lines
+        p.line(p.lerp(x, c.x, 1 - e), p.lerp(y, c.y, 1 - e), c.x, c.y)
+
+
 
       }
     }
     for (let node of nodes) {
       const { x, y } = node.state.position
-      const scaler = (p.map(mouse.dist(node.state.position), 0, 250, 0.6, 0.5, true))
+      const scaler = (p.map(mouse.dist(node.state.position), 0, 250, 0.7, 0.5, true))
       node.update(nodes)
       node.state.position.dist(mouse) < 50 ? node.trigger() : ""
       p.fill(white)
       p.noStroke()
       const s = scaler * node.state.size
-      const s2 = (scaler * node.state.size) + (scaler * node.state.energy) * 0.2
-      p.ellipse(x, y, s, s)
+      const s2 = (scaler * node.state.energy) * 1.2
+      // p.ellipse(x, y, s, s)
       if (node.state.energy > 0) {
         (node.getConnections()).length <= 5 ? p.fill(star) : p.fill(green)
         p.ellipse(x, y, s2, s2)
@@ -87,11 +94,11 @@ function createNode() {
   }
 
   const trigger = () => {
-    state.energy < state.size && !state.recentlyFired ? state.energy += 5 : ""
+    state.energy < state.size && !state.recentlyFired ? state.energy += 4 : ""
   }
 
   const update = (nodes) => {
-    state.energy > 0 ? state.energy -= 0.2 : ""
+    state.energy > 0 ? state.energy -= 0.3 : ""
     state.energy < 5 ? state.recentlyFired = false : ""
     // fire
     if (state.energy >= state.size) {
