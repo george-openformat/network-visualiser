@@ -8,10 +8,13 @@ new p5(sketch)
 * @param {p5} p - The p5 instance.
 */
 
+
+
 function sketch(p) {
-  const amount = (innerWidth / 15) * (innerHeight / 15)
+  const gridSize = 15
+  const amount = (innerWidth / gridSize) * (innerHeight / gridSize)
   console.log(amount)
-  const nodes = addNodes(p, parseInt(amount * 0.15))
+  const nodes = addNodes(p, parseInt(amount * 0.1), gridSize)
 
   const green = p.color(255)
   const star = p.color('#39c463')
@@ -31,12 +34,12 @@ function sketch(p) {
     p.stroke(white)
     for (let node of nodes) {
       const { x, y } = node.state.position
-      p.strokeWeight(p.map(mouse.dist(node.state.position), 0, 250, 6, 2, true))
+      p.strokeWeight(p.map(mouse.dist(node.state.position), 0, 250, 3, 2, true))
       const e = p.map(node.state.energy, 0, node.state.size, 0, 1)
       for (let { state: { position: c } } of node.getConnections()) {
         p.stroke(white)
         if (node.state.recentlyFired) {
-          (node.getConnections()).length <= 4 ? p.stroke(star) : p.stroke(green)
+          (node.getConnections()).length <= 5 ? p.stroke(star) : p.stroke(green)
         }
         p.line(x, y, c.x, c.y)
 
@@ -44,7 +47,7 @@ function sketch(p) {
     }
     for (let node of nodes) {
       const { x, y } = node.state.position
-      const scaler = (p.map(mouse.dist(node.state.position), 0, 250, 1, 0.5, true))
+      const scaler = (p.map(mouse.dist(node.state.position), 0, 250, 0.6, 0.5, true))
       node.update(nodes)
       node.state.position.dist(mouse) < 50 ? node.trigger() : ""
       p.fill(white)
@@ -53,7 +56,7 @@ function sketch(p) {
       const s2 = (scaler * node.state.size) + (scaler * node.state.energy) * 0.2
       p.ellipse(x, y, s, s)
       if (node.state.energy > 0) {
-        (node.getConnections()).length <= 4 ? p.fill(star) : p.fill(green)
+        (node.getConnections()).length <= 5 ? p.fill(star) : p.fill(green)
         p.ellipse(x, y, s2, s2)
       }
 
@@ -62,6 +65,7 @@ function sketch(p) {
 }
 // node
 function createNode() {
+  const id = uniqueId()
   const state = {
     size: 5,
     energy: 0,
@@ -97,15 +101,15 @@ function createNode() {
       }
 
       for (let n of nodes) {
-        if ((n.state.position.dist(state.position) < 50) && (connections.length < 5)) {
-          connections.some(c => c.id == n.id) ? "" : connect(n)
+        if ((n.state.position.dist(state.position) < 50) && (connections.length < 6)) {
+          connections.some(c => c.id == n.id) && (n.id == id) ? "" : connect(n)
         }
       }
     }
   }
 
   return {
-    id: uniqueId(),
+    id,
     connect,
     disconnect,
     getConnections: () => connections,
@@ -115,7 +119,7 @@ function createNode() {
   }
 }
 
-function addNodes(p, number) {
+function addNodes(p, number, gridSize) {
   const seeder = () => {
     let counter = Math.random() * 100
     return () => counter += Math.random()
@@ -123,8 +127,6 @@ function addNodes(p, number) {
 
   const x = seeder()
   const y = seeder()
-
-  const gridSize = 15
 
   const nodes = Array.from({ length: number }).map(() => {
     const n = createNode()
@@ -142,13 +144,11 @@ function addNodes(p, number) {
 
 
   for (let node of nodes) {
-
-
     for (let n of nodes) {
       if (node.state.position.dist(n.state.position) < (gridSize * 5)) {
         // TODO: connect only on angle (90)
         if (p.degrees((p5.Vector.sub(node.state.position, n.state.position)).heading()) % 90 == 0) {
-          (node.getConnections()).length < 10 ? node.connect(n) : ""
+          (node.getConnections()).length < 6 ? node.connect(n) : ""
         }
 
       }
