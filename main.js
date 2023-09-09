@@ -7,11 +7,15 @@ new p5(sketch)
 * This is a p5 sketch.
 * @param {p5} p - The p5 instance.
 */
+
 function sketch(p) {
-  const nodes = addNodes(p, 1000)
+  const amount = (innerWidth / 15) * (innerHeight / 15)
+  console.log(amount)
+  const nodes = addNodes(p, parseInt(amount * 0.15))
 
   const green = p.color(255)
-  const white = p.color('#39c463')
+  const star = p.color('#39c463')
+  const white = p.color(30)
 
   p.setup = () => {
     p.createCanvas(innerWidth, innerHeight)
@@ -28,9 +32,14 @@ function sketch(p) {
     for (let node of nodes) {
       const { x, y } = node.state.position
       p.strokeWeight(p.map(mouse.dist(node.state.position), 0, 250, 6, 2, true))
+      const e = p.map(node.state.energy, 0, node.state.size, 0, 1)
       for (let { state: { position: c } } of node.getConnections()) {
-        node.state.recentlyFired ? p.stroke(green) : p.stroke(white)
+        p.stroke(white)
+        if (node.state.recentlyFired) {
+          (node.getConnections()).length <= 4 ? p.stroke(star) : p.stroke(green)
+        }
         p.line(x, y, c.x, c.y)
+
       }
     }
     for (let node of nodes) {
@@ -44,7 +53,7 @@ function sketch(p) {
       const s2 = (scaler * node.state.size) + (scaler * node.state.energy) * 0.2
       p.ellipse(x, y, s, s)
       if (node.state.energy > 0) {
-        p.fill(p.color(green, node.state.energy))
+        (node.getConnections()).length <= 4 ? p.fill(star) : p.fill(green)
         p.ellipse(x, y, s2, s2)
       }
 
@@ -88,9 +97,8 @@ function createNode() {
       }
 
       for (let n of nodes) {
-        // TODO: dont connect to already connected ones
         if ((n.state.position.dist(state.position) < 50) && (connections.length < 5)) {
-          connect(n)
+          connections.some(c => c.id == n.id) ? "" : connect(n)
         }
       }
     }
