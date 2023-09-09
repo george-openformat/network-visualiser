@@ -75,6 +75,8 @@ function createNode() {
   const connections = []
 
   const connect = (node) => {
+    if ((node.id == id)) return
+
     connections.push(node)
     state.size += 2
   }
