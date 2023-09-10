@@ -7,11 +7,8 @@ new p5(sketch)
 * This is a p5 sketch.
 * @param {p5} p - The p5 instance.
 */
-
-
-
 function sketch(p) {
-  const gridSize = 15
+  const gridSize = 20
   const amount = (innerWidth / gridSize) * (innerHeight / gridSize)
   console.log(amount)
   const nodes = addNodes(p, parseInt(amount * 0.11), gridSize)
@@ -70,14 +67,20 @@ function sketch(p) {
     }
   }
 }
-// node
-function createNode() {
+
+/**
+ * createNode
+ * @param {number} x
+ * @param {number} y
+ * @returns 
+ */
+function createNode(x, y) {
   const id = uniqueId()
   const state = {
     size: 5,
     energy: 0,
     recentlyFired: false,
-    position: new p5.Vector()
+    position: new p5.Vector(x, y)
   }
   const connections = []
 
@@ -128,39 +131,42 @@ function createNode() {
   }
 }
 
+/**
+ * addNodes
+ * @param {p5} p
+ * @param {number} number
+ * @param {number} gridSize
+ * @returns
+ */
 function addNodes(p, number, gridSize) {
-  const seeder = () => {
-    let counter = Math.random() * 100
-    return () => counter += Math.random()
-  }
-
-  const x = seeder()
-  const y = seeder()
 
   const nodes = Array.from({ length: number }).map(() => {
-    const n = createNode()
-    n.state.position = p.createVector(
+    return createNode(
       Math.ceil(Math.random() * innerWidth / gridSize) * gridSize,
       Math.ceil(Math.random() * innerHeight / gridSize) * gridSize,
     )
-    // n.state.position = p.createVector(
-    //   Math.ceil(p.noise(x()) * innerWidth / gridSize) * gridSize,
-    //   Math.ceil(p.noise(y()) * innerHeight / gridSize) * gridSize,
-    // )
-    return n
   })
 
-
+  // add initial connections
+  const angle = 90
+  const connectionLength = 4
+  const maxConnections = 5
 
   for (let node of nodes) {
-    for (let n of nodes) {
-      if (node.state.position.dist(n.state.position) < (gridSize * 5)) {
-        // TODO: connect only on angle (90)
-        if (p.degrees((p5.Vector.sub(node.state.position, n.state.position)).heading()) % 90 == 0) {
-          (node.getConnections()).length < 6 ? node.connect(n) : ""
-        }
-
+    connections: for (let n of nodes) {
+      if (node.state.position.dist(n.state.position) > gridSize * connectionLength) {
+        continue connections
       }
+
+      if (p.degrees((p5.Vector.sub(n.state.position, node.state.position)).heading()) % angle != 0) {
+        continue connections
+      }
+
+      if ((node.getConnections()).length > maxConnections) {
+        continue connections
+      }
+
+      node.connect(n)
     }
   }
 
