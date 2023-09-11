@@ -104,7 +104,7 @@ function sketch(p) {
     for (let node of nodes) {
       const { x, y } = node.state.position
       const scaler = (p.map(mouse.dist(node.state.position), 0, 250, 1, 0.5, true))
-      node.state.position.dist(mouse) < 50 ? node.trigger() : ""
+      node.state.position.dist(mouse) < 50 && node.connections.length > 1 ? node.trigger() : ""
       p.fill(white)
       p.noStroke()
       const s = scaler * node.state.size * 2
@@ -237,13 +237,13 @@ function createNode(x, y) {
       state.energy = 0
     }
     if (state.stamina > 1) {
-      state.stamina += 0.05
+      state.stamina += 0.1
     }
     if (state.stamina > 2) {
       state.stamina = 0
     }
     if (state.glow > 0) {
-      state.glow -= 0.1
+      state.glow -= 0.05
     }
 
   }
