@@ -8,15 +8,16 @@ new p5(sketch)
 * @param {p5} p - The p5 instance.
 */
 function sketch(p) {
-  const gridSize = 10
+  const gridSize = 12
   const amount = (innerWidth / gridSize) * (innerHeight / gridSize)
   console.log(amount)
-  const { nodes, connections, possibleConnections } = addNodes(p, parseInt(amount * 0.1), gridSize)
+  const { nodes, connections, possibleConnections } = addNodes(p, parseInt(amount * 0.12), gridSize)
 
   console.log(connections)
 
   const green = p.color(255)
-  const star = p.color('#39c463')
+  // const star = p.color('#39c463')
+  const star = p.color(255,255,0)
   const white = p.color(30)
 
   p.setup = () => {
@@ -178,7 +179,7 @@ function createConnection(nodePair) {
     // TODO: make count a state and lerp from it with animation
     // TODO: set direction so can animate correctly
     if (state.isActive) {
-      state.progress += 0.1
+      state.progress += 0.2
       // trigger node
       if (state.progress > 1 && action) {
         action()
@@ -243,7 +244,7 @@ function createNode(x, y) {
       state.stamina = 0
     }
     if (state.glow > 0) {
-      state.glow -= 0.05
+      state.glow -= 0.1
     }
 
   }
